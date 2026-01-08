@@ -14,14 +14,17 @@ const app = express();
 //     origin: "http://localhost:5173"
 // };
 
-const allowedOrigins = [
-    'http://localhost:5173',
-    'http://localhost:4173',
-    'https://gamescookie.com',
-    'https://www.gamescookie.com',
-    'https://play1.gamescookie.com',
-    'https://play2.gamescookie.com',
-];
+// Load allowed origins from environment variable or use defaults
+const allowedOrigins = process.env.ALLOWED_ORIGINS 
+    ? process.env.ALLOWED_ORIGINS.split(',').map(origin => origin.trim())
+    : [
+        'http://localhost:5173',
+        'http://localhost:4173',
+        'https://gamescookie.com',
+        'https://www.gamescookie.com',
+        'https://play1.gamescookie.com',
+        'https://play2.gamescookie.com',
+    ];
 
 const corsOptions = {
     origin: function (origin, callback) {
@@ -194,9 +197,5 @@ app.post('/delete-image', async (req, res) => {
 //..........................................................................
 //..........................................................................
 
-// set port, listen for requests
-const PORT = process.env.PORT || 8081;
-
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}.`);
-});
+// Export app for server.js to use
+module.exports = app;
