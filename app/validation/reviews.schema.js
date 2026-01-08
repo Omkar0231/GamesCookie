@@ -1,0 +1,7 @@
+import Joi from 'joi';
+
+export const create = Joi.object({
+  gameId: Joi.number().required(),
+  rating: Joi.number().required(),
+  comment: Joi.string().empty(''),
+});
