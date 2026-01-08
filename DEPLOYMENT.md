@@ -179,27 +179,27 @@ Internet
 
 ```bash
 # View all logs
-docker-compose logs -f
+docker compose logs -f
 
 # View specific service
-docker-compose logs -f app
-docker-compose logs -f nginx
-docker-compose logs -f db
+docker compose logs -f app
+docker compose logs -f nginx
+docker compose logs -f db
 
 # Restart service
-docker-compose restart app
+docker compose restart app
 
 # Stop everything
-docker-compose down
+docker compose down
 
 # Rebuild and restart
-docker-compose up -d --build
+docker compose up -d --build
 
 # Database backup
-docker-compose exec db mysqldump -u root -p gamescookie > backup.sql
+docker compose exec db mysqldump -u root -p gamescookie > backup.sql
 
 # Check certificate expiry
-docker-compose run --rm certbot certificates
+docker compose run --rm certbot certificates
 ```
 
 ---

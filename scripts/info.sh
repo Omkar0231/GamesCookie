@@ -191,32 +191,32 @@ OPTIONAL:
 ══════════════════
 
 Start Services:
-  docker-compose up -d
+  docker compose up -d
 
 View Logs:
-  docker-compose logs -f
-  docker-compose logs -f app          # App only
-  docker-compose logs -f nginx        # Nginx only
+  docker compose logs -f
+  docker compose logs -f app          # App only
+  docker compose logs -f nginx        # Nginx only
 
 Check Status:
-  docker-compose ps
+  docker compose ps
   ./scripts/health-check.sh
 
 Restart Services:
-  docker-compose restart
-  docker-compose restart app          # App only
+  docker compose restart
+  docker compose restart app          # App only
 
 Stop Services:
-  docker-compose down
+  docker compose down
 
 Database Access:
-  docker-compose exec db mysql -u root -p
+  docker compose exec db mysql -u root -p
 
 Database Backup:
-  docker-compose exec db mysqldump -u root -p gamescookie > backup.sql
+  docker compose exec db mysqldump -u root -p gamescookie > backup.sql
 
 Database Restore:
-  docker-compose exec -T db mysql -u root -p gamescookie < backup.sql
+  docker compose exec -T db mysql -u root -p gamescookie < backup.sql
 
 
 🔒 SECURITY FEATURES
@@ -271,7 +271,7 @@ Database Restore:
 ══════════════════
 
 Service won't start:
-  → docker-compose logs <service>
+  → docker compose logs <service>
   → Check .env configuration
   → Verify ports are not in use
 
@@ -283,8 +283,8 @@ SSL certificate fails:
 
 Database connection error:
   → Check DB credentials in .env
-  → Verify database is running: docker-compose ps db
-  → Check logs: docker-compose logs db
+  → Verify database is running: docker compose ps db
+  → Check logs: docker compose logs db
 
 Port already in use:
   → sudo lsof -i :80
@@ -362,7 +362,7 @@ Next Steps:
   1. Review .env.example
   2. Create and configure .env
   3. Run: ./scripts/deploy-production.sh
-  4. Monitor: docker-compose logs -f
+  4. Monitor: docker compose logs -f
   5. Test: https://your-domain.com
 
 Need help? Check the documentation:

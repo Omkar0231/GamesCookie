@@ -61,7 +61,7 @@ Use this checklist before deploying to production.
 - [ ] Verify health: `./scripts/health-check.sh`
 
 ### Monitoring
-- [ ] Check logs: `docker-compose logs -f`
+- [ ] Check logs: `docker compose logs -f`
 - [ ] No errors in application logs
 - [ ] Database connected successfully
 - [ ] Nginx logs show traffic
@@ -125,24 +125,24 @@ DevOps Lead: _______________________
 
 ```bash
 # Check status
-docker-compose ps
+docker compose ps
 ./scripts/health-check.sh
 
 # View logs
-docker-compose logs -f app
+docker compose logs -f app
 
 # Restart
-docker-compose restart
+docker compose restart
 
 # Stop
-docker-compose down
+docker compose down
 
 # Backup database
-docker-compose exec db mysqladump -u root -p gamescookie > backup.sql
+docker compose exec db mysqladump -u root -p gamescookie > backup.sql
 
 # Update application
 git pull
-docker-compose up -d --build
+docker compose up -d --build
 ```
 
 ## Rollback Plan
@@ -151,7 +151,7 @@ If deployment fails:
 
 1. Stop services:
    ```bash
-   docker-compose down
+   docker compose down
    ```
 
 2. Restore previous `.env`:
@@ -161,12 +161,12 @@ If deployment fails:
 
 3. Restore database:
    ```bash
-   docker-compose exec -T db mysql -u root -p gamescookie < backup.sql
+   docker compose exec -T db mysql -u root -p gamescookie < backup.sql
    ```
 
 4. Restart services:
    ```bash
-   docker-compose up -d
+   docker compose up -d
    ```
 
 ## Success Criteria

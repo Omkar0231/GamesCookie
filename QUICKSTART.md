@@ -70,22 +70,22 @@ nano .env
 
 ### View Logs
 ```bash
-docker-compose logs -f app
+docker compose logs -f app
 ```
 
 ### Restart Services
 ```bash
-docker-compose restart
+docker compose restart
 ```
 
 ### Access Database
 ```bash
-docker-compose exec db mysql -u root -p
+docker compose exec db mysql -u root -p
 ```
 
 ### Stop Everything
 ```bash
-docker-compose down
+docker compose down
 ```
 
 ---
@@ -100,7 +100,7 @@ See [README.md](README.md) for complete documentation.
 
 **Issue**: Services won't start
 ```bash
-docker-compose logs
+docker compose logs
 ```
 
 **Issue**: SSL certificate fails
@@ -109,7 +109,7 @@ docker-compose logs
 
 **Issue**: Database connection error
 - Verify DB credentials in .env
-- Check if database is running: `docker-compose ps db`
+- Check if database is running: `docker compose ps db`
 
 ---
 

@@ -23,7 +23,7 @@ if ! command -v docker &> /dev/null; then
 fi
 
 # Check if Docker Compose is installed
-if ! command -v docker-compose &> /dev/null; then
+if ! command -v docker compose &> /dev/null; then
     echo -e "${RED}❌ Docker Compose is not installed. Please install Docker Compose first.${NC}"
     exit 1
 fi
@@ -74,7 +74,7 @@ EOF
 
 # Build Docker images
 echo -e "${YELLOW}🏗️  Building Docker images...${NC}"
-docker-compose build
+docker compose build
 
 echo -e "${GREEN}✅ Docker images built successfully${NC}"
 echo ""
@@ -84,7 +84,7 @@ echo ""
 echo -e "${BLUE}📋 Next steps:${NC}"
 echo "  1. Review and update .env file with your configuration"
 echo "  2. For production with SSL, run: ${YELLOW}./scripts/deploy-production.sh${NC}"
-echo "  3. For development, run: ${YELLOW}docker-compose up -d${NC}"
+echo "  3. For development, run: ${YELLOW}docker compose up -d${NC}"
 echo ""
 echo -e "${YELLOW}⚠️  Important:${NC}"
 echo "  - Make sure your domain DNS is pointing to this server before setting up SSL"

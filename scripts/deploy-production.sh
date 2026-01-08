@@ -55,20 +55,20 @@ fi
 
 echo ""
 echo -e "${YELLOW}🛑 Stopping any running containers...${NC}"
-docker-compose down
+docker compose down
 
 echo -e "${YELLOW}🏗️  Building fresh Docker images...${NC}"
-docker-compose build --no-cache
+docker compose build --no-cache
 
 echo -e "${YELLOW}🚀 Starting services...${NC}"
-docker-compose up -d
+docker compose up -d
 
 echo ""
 echo -e "${YELLOW}⏳ Waiting for services to be healthy...${NC}"
 
 # Wait for database to be ready
 echo -n "   Waiting for database..."
-until docker-compose exec -T db mysqladmin ping -h localhost -u root -p${DB_PASSWORD} --silent 2>/dev/null; do
+until docker compose exec -T db mysqladmin ping -h localhost -u root -p${DB_PASSWORD} --silent 2>/dev/null; do
     echo -n "."
     sleep 2
 done
@@ -84,7 +84,7 @@ until curl -f http://localhost:8081/ &>/dev/null; do
     RETRY_COUNT=$((RETRY_COUNT + 1))
     if [ $RETRY_COUNT -ge $MAX_RETRIES ]; then
         echo -e " ${RED}❌${NC}"
-        echo -e "${RED}Application failed to start. Check logs with: docker-compose logs app${NC}"
+        echo -e "${RED}Application failed to start. Check logs with: docker compose logs app${NC}"
         exit 1
     fi
 done
@@ -94,16 +94,16 @@ echo ""
 echo -e "${GREEN}✅ Deployment successful!${NC}"
 echo ""
 echo -e "${BLUE}📊 Service Status:${NC}"
-docker-compose ps
+docker compose ps
 echo ""
 echo -e "${BLUE}🔗 Your application is running at:${NC}"
 echo "   HTTP:  http://$DOMAIN"
 echo "   HTTPS: https://$DOMAIN"
 echo ""
 echo -e "${BLUE}📝 Useful commands:${NC}"
-echo "   View logs:        ${YELLOW}docker-compose logs -f${NC}"
-echo "   View app logs:    ${YELLOW}docker-compose logs -f app${NC}"
-echo "   Restart services: ${YELLOW}docker-compose restart${NC}"
-echo "   Stop services:    ${YELLOW}docker-compose down${NC}"
-echo "   Access database:  ${YELLOW}docker-compose exec db mysql -u root -p${NC}"
+echo "   View logs:        ${YELLOW}docker compose logs -f${NC}"
+echo "   View app logs:    ${YELLOW}docker compose logs -f app${NC}"
+echo "   Restart services: ${YELLOW}docker compose restart${NC}"
+echo "   Stop services:    ${YELLOW}docker compose down${NC}"
+echo "   Access database:  ${YELLOW}docker compose exec db mysql -u root -p${NC}"
 echo ""

@@ -19,7 +19,7 @@ fi
 
 # Start services
 echo "📦 Starting services with Docker Compose..."
-docker-compose up -d
+docker compose up -d
 
 echo ""
 echo "⏳ Waiting for services to start..."
@@ -29,10 +29,10 @@ echo ""
 echo "✅ Services started!"
 echo ""
 echo "📊 Service Status:"
-docker-compose ps
+docker compose ps
 echo ""
 echo "🔗 Application running at: http://localhost:8081"
 echo ""
-echo "📝 View logs: docker-compose logs -f"
-echo "🛑 Stop services: docker-compose down"
+echo "📝 View logs: docker compose logs -f"
+echo "🛑 Stop services: docker compose down"
 echo ""

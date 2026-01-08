@@ -76,12 +76,12 @@ server {
 EOF
 
 # Start nginx temporarily
-docker-compose up -d nginx
+docker compose up -d nginx
 
 echo -e "${YELLOW}🔑 Requesting SSL certificate from Let's Encrypt...${NC}"
 
 # Request certificate
-docker-compose run --rm certbot certonly \
+docker compose run --rm certbot certonly \
     --webroot \
     --webroot-path=/var/www/certbot \
     --email $ADMIN_EMAIL \
@@ -103,7 +103,7 @@ if [ $? -eq 0 ]; then
     
     # Restart nginx with SSL config
     echo -e "${YELLOW}🔄 Restarting Nginx with SSL configuration...${NC}"
-    docker-compose restart nginx
+    docker compose restart nginx
     
     echo -e "${GREEN}✅ SSL setup complete!${NC}"
     echo -e "${GREEN}🔒 Your site is now secured with HTTPS${NC}"

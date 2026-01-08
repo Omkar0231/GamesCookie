@@ -160,45 +160,45 @@ backend/
 
 ```bash
 # View all services
-docker-compose ps
+docker compose ps
 
 # View logs (all services)
-docker-compose logs -f
+docker compose logs -f
 
 # View app logs only
-docker-compose logs -f app
+docker compose logs -f app
 
 # Restart services
-docker-compose restart
+docker compose restart
 
 # Stop all services
-docker-compose down
+docker compose down
 
 # Stop and remove volumes
-docker-compose down -v
+docker compose down -v
 ```
 
 ### Database Access
 
 ```bash
 # Access MySQL shell
-docker-compose exec db mysql -u root -p
+docker compose exec db mysql -u root -p
 
 # Backup database
-docker-compose exec db mysqldump -u root -p gamescookie > backup.sql
+docker compose exec db mysqldump -u root -p gamescookie > backup.sql
 
 # Restore database
-docker-compose exec -T db mysql -u root -p gamescookie < backup.sql
+docker compose exec -T db mysql -u root -p gamescookie < backup.sql
 ```
 
 ### SSL Certificate Management
 
 ```bash
 # Manually renew certificates
-docker-compose run --rm certbot renew
+docker compose run --rm certbot renew
 
 # View certificate info
-docker-compose run --rm certbot certificates
+docker compose run --rm certbot certificates
 ```
 
 ### Application Updates
@@ -208,8 +208,8 @@ docker-compose run --rm certbot certificates
 git pull
 
 # Rebuild and restart
-docker-compose build --no-cache
-docker-compose up -d
+docker compose build --no-cache
+docker compose up -d
 
 # Or use the deploy script
 ./scripts/deploy-production.sh
@@ -246,21 +246,21 @@ docker-compose up -d
 
 ```bash
 # Check logs
-docker-compose logs
+docker compose logs
 
 # Check specific service
-docker-compose logs app
-docker-compose logs db
+docker compose logs app
+docker compose logs db
 ```
 
 ### SSL certificate issues
 
 ```bash
 # Check certificate status
-docker-compose run --rm certbot certificates
+docker compose run --rm certbot certificates
 
 # Force renewal
-docker-compose run --rm certbot renew --force-renewal
+docker compose run --rm certbot renew --force-renewal
 
 # Re-run SSL setup
 ./scripts/setup-ssl.sh
@@ -270,10 +270,10 @@ docker-compose run --rm certbot renew --force-renewal
 
 ```bash
 # Check if database is running
-docker-compose ps db
+docker compose ps db
 
 # Check database logs
-docker-compose logs db
+docker compose logs db
 
 # Verify credentials in .env file
 cat .env | grep DB_
@@ -307,7 +307,7 @@ curl https://your-domain.com/
 
 ```bash
 # View Docker health status
-docker-compose ps
+docker compose ps
 
 # View detailed container info
 docker inspect gamescookie-backend
@@ -319,7 +319,7 @@ docker inspect gamescookie-backend
 
 ```bash
 # Backup database
-docker-compose exec db mysqldump -u root -p${DB_PASSWORD} gamescookie > backup_$(date +%Y%m%d).sql
+docker compose exec db mysqldump -u root -p${DB_PASSWORD} gamescookie > backup_$(date +%Y%m%d).sql
 
 # Backup uploads
 tar -czf uploads_backup_$(date +%Y%m%d).tar.gz uploads/
@@ -332,7 +332,7 @@ tar -czf ssl_backup_$(date +%Y%m%d).tar.gz docker/certbot/
 
 ```bash
 # Restore database
-docker-compose exec -T db mysql -u root -p${DB_PASSWORD} gamescookie < backup_20240101.sql
+docker compose exec -T db mysql -u root -p${DB_PASSWORD} gamescookie < backup_20240101.sql
 
 # Restore uploads
 tar -xzf uploads_backup_20240101.tar.gz
@@ -377,7 +377,7 @@ services:
 
 For issues or questions:
 - Email: admin@gamescookie.com
-- Check logs: `docker-compose logs -f`
+- Check logs: `docker compose logs -f`
 
 ## 📄 License
 

@@ -32,7 +32,7 @@ echo -e "${GREEN}✅ Docker is running${NC}"
 # Check containers
 echo ""
 echo "📦 Container Status:"
-docker-compose ps
+docker compose ps
 
 echo ""
 echo "🔍 Service Health Checks:"
@@ -45,14 +45,14 @@ else
 fi
 
 # Check database
-if docker-compose exec -T db mysqladmin ping -h localhost -u root -p${DB_PASSWORD} --silent 2>/dev/null; then
+if docker compose exec -T db mysqladmin ping -h localhost -u root -p${DB_PASSWORD} --silent 2>/dev/null; then
     echo -e "   Database:  ${GREEN}✅ Healthy${NC}"
 else
     echo -e "   Database:  ${RED}❌ Unhealthy${NC}"
 fi
 
 # Check nginx
-if docker-compose exec -T nginx nginx -t &> /dev/null; then
+if docker compose exec -T nginx nginx -t &> /dev/null; then
     echo -e "   Nginx:     ${GREEN}✅ Healthy${NC}"
 else
     echo -e "   Nginx:     ${RED}❌ Unhealthy${NC}"
@@ -63,7 +63,7 @@ if [ -d "docker/certbot/conf/live/$DOMAIN" ]; then
     echo -e "   SSL:       ${GREEN}✅ Configured${NC}"
     
     # Check expiry
-    expiry=$(docker-compose run --rm certbot certificates 2>/dev/null | grep "Expiry Date" | head -1 || echo "")
+    expiry=$(docker compose run --rm certbot certificates 2>/dev/null | grep "Expiry Date" | head -1 || echo "")
     if [ ! -z "$expiry" ]; then
         echo -e "              $expiry"
     fi
