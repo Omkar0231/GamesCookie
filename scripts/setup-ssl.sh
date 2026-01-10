@@ -44,39 +44,13 @@ echo ""
 mkdir -p docker/certbot/conf
 mkdir -p docker/certbot/www
 
-echo -e "${YELLOW}🌐 Starting Nginx in HTTP-only mode...${NC}"
+echo -e "${YELLOW}🔄 Ensuring services are up...${NC}"
 
-# Temporarily modify nginx config for initial certificate request
-cp docker/nginx/conf.d/app.conf docker/nginx/conf.d/app.conf.backup
+# Make sure all services are running
+docker compose up -d
 
-# Create temporary nginx config without SSL
-cat > docker/nginx/conf.d/app.conf << 'EOF'
-upstream backend {
-    server app:8081;
-    keepalive 32;
-}
-
-server {
-    listen 80;
-    listen [::]:80;
-    server_name _;
-
-    location /.well-known/acme-challenge/ {
-        root /var/www/certbot;
-    }
-
-    location / {
-        proxy_pass http://backend;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-}
-EOF
-
-# Start nginx temporarily
-docker compose up -d nginx
+echo -e "${YELLOW}⏳ Waiting for services to be ready...${NC}"
+sleep 10
 
 echo -e "${YELLOW}🔑 Requesting SSL certificate from Let's Encrypt...${NC}"
 
@@ -87,21 +61,13 @@ docker compose run --rm certbot certonly \
     --email $ADMIN_EMAIL \
     --agree-tos \
     --no-eff-email \
-    -d $DOMAIN \
-    -d www.$DOMAIN
+    -d $DOMAIN
 
 # Check if certificate was obtained successfully
 if [ $? -eq 0 ]; then
     echo -e "${GREEN}✅ SSL certificate obtained successfully!${NC}"
     
-    # Restore original nginx config with SSL
-    mv docker/nginx/conf.d/app.conf.backup docker/nginx/conf.d/app.conf
-    
-    # Replace DOMAIN placeholder in nginx config
-    sed -i.bak "s/DOMAIN/$DOMAIN/g" docker/nginx/conf.d/app.conf
-    rm docker/nginx/conf.d/app.conf.bak
-    
-    # Restart nginx with SSL config
+    # Restart nginx to load the SSL certificates
     echo -e "${YELLOW}🔄 Restarting Nginx with SSL configuration...${NC}"
     docker compose restart nginx
     
@@ -109,8 +75,22 @@ if [ $? -eq 0 ]; then
     echo -e "${GREEN}🔒 Your site is now secured with HTTPS${NC}"
     echo ""
     echo -e "${YELLOW}📝 Note: Certificates will auto-renew every 12 hours${NC}"
+    echo ""
+    echo -e "${YELLOW}🧪 Testing HTTPS...${NC}"
+    sleep 5
+    if curl -sI https://$DOMAIN | grep -q "200 OK\|301 Moved\|302 Found"; then
+        echo -e "${GREEN}✅ HTTPS is working!${NC}"
+    else
+        echo -e "${YELLOW}⚠️  HTTPS might take a moment to become available${NC}"
+    fi
 else
     echo -e "${RED}❌ Failed to obtain SSL certificate${NC}"
-    mv docker/nginx/conf.d/app.conf.backup docker/nginx/conf.d/app.conf
+    echo ""
+    echo -e "${YELLOW}Common issues:${NC}"
+    echo "  - DNS not pointing to this server"
+    echo "  - Port 80 not accessible from internet"
+    echo "  - Domain already has too many certificates (Let's Encrypt limit)"
+    echo ""
+    echo -e "${YELLOW}Check logs with: docker compose logs certbot${NC}"
     exit 1
 fi
