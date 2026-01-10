@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # SSL Certificate Setup Script for GamesCookie Backend
-# This script obtains SSL certificates using Let's Encrypt
+# This script is a wrapper that calls the proper initialization script
 
 set -e
 
@@ -9,10 +9,13 @@ set -e
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-echo -e "${GREEN}🔐 GamesCookie SSL Certificate Setup${NC}"
-echo "========================================"
+echo -e "${BLUE}╔════════════════════════════════════════════════════════╗${NC}"
+echo -e "${BLUE}║        GamesCookie SSL Certificate Setup              ║${NC}"
+echo -e "${BLUE}╚════════════════════════════════════════════════════════╝${NC}"
+echo ""
 
 # Check if .env file exists
 if [ ! -f .env ]; then
@@ -22,7 +25,7 @@ if [ ! -f .env ]; then
 fi
 
 # Load environment variables
-source .env
+export $(cat .env | grep -v '^#' | xargs)
 
 # Validate required variables
 if [ -z "$DOMAIN" ]; then
@@ -40,57 +43,58 @@ echo "   Domain: $DOMAIN"
 echo "   Email: $ADMIN_EMAIL"
 echo ""
 
-# Create certbot directories
+# Check DNS
+echo -e "${YELLOW}🔍 Checking DNS configuration...${NC}"
+RESOLVED_IP=$(dig +short $DOMAIN | tail -n1)
+if [ -z "$RESOLVED_IP" ]; then
+    echo -e "${YELLOW}⚠️  Warning: Could not resolve DNS for $DOMAIN${NC}"
+    read -p "Continue anyway? (y/N) " -n 1 -r
+    echo ""
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        exit 1
+    fi
+else
+    echo -e "${GREEN}✅ DNS resolves to: $RESOLVED_IP${NC}"
+fi
+
+# Check Docker
+echo -e "${YELLOW}🐳 Checking Docker...${NC}"
+if ! docker info > /dev/null 2>&1; then
+    echo -e "${RED}❌ Error: Docker is not running${NC}"
+    exit 1
+fi
+echo -e "${GREEN}✅ Docker is running${NC}"
+
+# Create necessary directories
 mkdir -p docker/certbot/conf
 mkdir -p docker/certbot/www
 
-echo -e "${YELLOW}🔄 Ensuring services are up...${NC}"
+# Make init script executable
+chmod +x scripts/init-letsencrypt.sh
 
-# Make sure all services are running
-docker compose up -d
+echo ""
+echo -e "${YELLOW}🚀 Starting SSL certificate initialization...${NC}"
+echo ""
 
-echo -e "${YELLOW}⏳ Waiting for services to be ready...${NC}"
-sleep 10
+# Call the init script
+./scripts/init-letsencrypt.sh
 
-echo -e "${YELLOW}🔑 Requesting SSL certificate from Let's Encrypt...${NC}"
-
-# Request certificate
-docker compose run --rm certbot certonly \
-    --webroot \
-    --webroot-path=/var/www/certbot \
-    --email $ADMIN_EMAIL \
-    --agree-tos \
-    --no-eff-email \
-    -d $DOMAIN
-
-# Check if certificate was obtained successfully
+# Check if successful
 if [ $? -eq 0 ]; then
-    echo -e "${GREEN}✅ SSL certificate obtained successfully!${NC}"
-    
-    # Restart nginx to load the SSL certificates
-    echo -e "${YELLOW}🔄 Restarting Nginx with SSL configuration...${NC}"
-    docker compose restart nginx
-    
-    echo -e "${GREEN}✅ SSL setup complete!${NC}"
-    echo -e "${GREEN}🔒 Your site is now secured with HTTPS${NC}"
-    echo ""
-    echo -e "${YELLOW}📝 Note: Certificates will auto-renew every 12 hours${NC}"
     echo ""
     echo -e "${YELLOW}🧪 Testing HTTPS...${NC}"
     sleep 5
-    if curl -sI https://$DOMAIN | grep -q "200 OK\|301 Moved\|302 Found"; then
+    if curl -sI https://$DOMAIN | head -n 1 | grep -q "HTTP"; then
         echo -e "${GREEN}✅ HTTPS is working!${NC}"
+        echo ""
+        echo -e "${GREEN}🎉 Your site is now secured with HTTPS${NC}"
+        echo -e "${YELLOW}📝 Certificates will auto-renew every 12 hours${NC}"
     else
-        echo -e "${YELLOW}⚠️  HTTPS might take a moment to become available${NC}"
+        echo -e "${YELLOW}⚠️  HTTPS response received but verify manually${NC}"
+        echo "   Visit: https://$DOMAIN"
     fi
 else
-    echo -e "${RED}❌ Failed to obtain SSL certificate${NC}"
     echo ""
-    echo -e "${YELLOW}Common issues:${NC}"
-    echo "  - DNS not pointing to this server"
-    echo "  - Port 80 not accessible from internet"
-    echo "  - Domain already has too many certificates (Let's Encrypt limit)"
-    echo ""
-    echo -e "${YELLOW}Check logs with: docker compose logs certbot${NC}"
+    echo -e "${RED}❌ SSL setup failed${NC}"
     exit 1
 fi
