@@ -57,6 +57,8 @@ services:
     image: nginx:alpine
     container_name: gamescookie-nginx
     restart: unless-stopped
+    environment:
+      - NGINX_HOST=${DOMAIN}
     ports:
       - "80:80"
       - "443:443"

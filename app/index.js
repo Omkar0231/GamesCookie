@@ -1,12 +1,11 @@
 const express = require("express");
 const cors = require("cors");
-const dotenv = require('dotenv').config();
+const dotenv = require("dotenv").config();
 
-
-const multer  = require('multer')
-const fs = require('fs');
-const fsPromises = require('fs/promises');
-const path = require('path');
+const multer = require("multer");
+const fs = require("fs");
+const fsPromises = require("fs/promises");
+const path = require("path");
 
 const app = express();
 
@@ -15,32 +14,32 @@ const app = express();
 // };
 
 // Load allowed origins from environment variable or use defaults
-const allowedOrigins = process.env.ALLOWED_ORIGINS 
-    ? process.env.ALLOWED_ORIGINS.split(',').map(origin => origin.trim())
-    : [
-        'http://localhost:5173',
-        'http://localhost:4173',
-        'https://gamescookie.com',
-        'https://www.gamescookie.com',
-        'https://play1.gamescookie.com',
-        'https://play2.gamescookie.com',
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(",").map((origin) => origin.trim())
+  : [
+      "http://localhost:5173",
+      "http://localhost:4173",
+      "https://gamescookie.com",
+      "https://www.gamescookie.com",
+      "https://play1.gamescookie.com",
+      "https://play2.gamescookie.com",
     ];
 
 const corsOptions = {
-    origin: function (origin, callback) {
-        // Allow requests with no origin (mobile apps, curl, etc.)
-        if (!origin) return callback(null, true);
-        
-        if (allowedOrigins.includes(origin)) {
-            callback(null, true);
-        } else {
-            callback(new Error('Not allowed by CORS'));
-        }
-    },
-    methods: ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE'],
-    // allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true,
-    optionsSuccessStatus: 200
+  origin: function (origin, callback) {
+    // Allow requests with no origin (mobile apps, curl, etc.)
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  methods: ["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE"],
+  // allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+  optionsSuccessStatus: 200,
 };
 
 app.use(cors(corsOptions));
@@ -61,8 +60,6 @@ app.use(cors(corsOptions));
 //   credentials: true
 // }));
 
-
-
 // parse requests of content-type - application/json
 app.use(express.json());
 
@@ -72,13 +69,14 @@ app.use(express.urlencoded({ extended: true }));
 //.........
 const db = require("./models");
 
-db.sequelize.sync()
-    .then(() => {
-        console.log("Synced db.");
-    })
-    .catch((err) => {
-        console.log("Failed to sync db: " + err.message);
-    });
+db.sequelize
+  .sync()
+  .then(() => {
+    console.log("Synced db.");
+  })
+  .catch((err) => {
+    console.log("Failed to sync db: " + err.message);
+  });
 
 // // drop the table if it already exists
 // db.sequelize.sync({ force: true }).then(() => {
@@ -87,31 +85,29 @@ db.sequelize.sync()
 
 // route
 app.get("/", (req, res) => {
-    res.json({ message: "Welcome to Games Cookie." });
+  res.json({ message: "Welcome to Games Cookie." });
 });
 
 // anything beginning with "/api" will go into this
-app.use('/api', require('./routes'));
-
+app.use("/api", require("./routes"));
 
 //..........................................................................
 //..........................................................................
 //..........................................................................
 
 const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        const dynamicFolder = req.params.folderName;
-        const uploadPath = `./uploads/${dynamicFolder}`;
-        // Create the directory if it doesn't exist
-        fs.mkdir(uploadPath, { recursive: true }, (err) => {
-            cb(null, uploadPath); // Pass the dynamic path to the callback
-        });
-    },
-    filename: function (req, file, cb) {
-        cb(null, Date.now() + path.extname(file.originalname));
-    }
-}); 
-
+  destination: function (req, file, cb) {
+    const dynamicFolder = req.params.folderName;
+    const uploadPath = `./uploads/${dynamicFolder}`;
+    // Create the directory if it doesn't exist
+    fs.mkdir(uploadPath, { recursive: true }, (err) => {
+      cb(null, uploadPath); // Pass the dynamic path to the callback
+    });
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + path.extname(file.originalname));
+  },
+});
 
 // const upload = multer({ storage: storage });
 const upload = multer({
@@ -119,7 +115,11 @@ const upload = multer({
   fileFilter: (req, file, cb) => {
     var allowedExtensions = /(\.jpg|\.jpeg|\.png|\.gif)$/i;
     if (!allowedExtensions.exec(file.originalname)) {
-        return cb(new Error('Please upload files with extensions .jpeg/.jpg/.png/.gif only.'));
+      return cb(
+        new Error(
+          "Please upload files with extensions .jpeg/.jpg/.png/.gif only."
+        )
+      );
     }
     cb(null, true);
   },
@@ -128,71 +128,64 @@ const upload = multer({
 
 // File filter to accept only PDFs
 const pdfFileFilter = (req, file, cb) => {
-  if (file.mimetype === 'application/pdf') {
+  if (file.mimetype === "application/pdf") {
     cb(null, true);
   } else {
-    cb(new Error('Only PDF files are allowed'), false);
+    cb(new Error("Only PDF files are allowed"), false);
   }
 };
 
 // Configure multer
-const uploadPDF = multer({ 
+const uploadPDF = multer({
   storage: storage,
   fileFilter: pdfFileFilter,
   limits: {
-    fileSize: 10 * 1024 * 1024 // 10MB limit
-  }
+    fileSize: 10 * 1024 * 1024, // 10MB limit
+  },
 });
 
-
-
-app.post('/file-upload/:folderName', upload.single('image'), (req, res) => {
-    if (!req.file) {
-        return res.status(400).send({
-            message: "Please upload files with extensions .jpeg/.jpg/.png/.gif only."
-        });
-    }
-    return res.status(200).json({
-        message: "Image uploaded successfully!",
-        filename: req.file.filename,
-        path: req.file.path,
+app.post("/file-upload/:folderName", upload.single("image"), (req, res) => {
+  if (!req.file) {
+    return res.status(400).send({
+      message: "Please upload files with extensions .jpeg/.jpg/.png/.gif only.",
     });
+  }
+  return res.status(200).json({
+    message: "Image uploaded successfully!",
+    filename: req.file.filename,
+    path: req.file.path,
+  });
 });
 
-app.post('/upload-pdf/:folderName', uploadPDF.single('pdf'), (req, res) => {
+app.post("/upload-pdf/:folderName", uploadPDF.single("pdf"), (req, res) => {
   try {
     if (!req.file) {
-      return res.status(400).json({ error: 'No file uploaded' });
+      return res.status(400).json({ error: "No file uploaded" });
     }
 
     // File upload successful
     return res.status(200).json({
-        message: "PDF uploaded successfully!",
-        filename: req.file.filename,
-        path: req.file.path,
+      message: "PDF uploaded successfully!",
+      filename: req.file.filename,
+      path: req.file.path,
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-
-
-
-app.use('/uploads', express.static('uploads'));
-
+app.use("/uploads", express.static("uploads"));
 
 //..........................................................................
 //..........................................................................
-app.post('/delete-image', async (req, res) => {
-    const { fileName } = req.body;
+app.post("/delete-image", async (req, res) => {
+  const { fileName } = req.body;
 
-    await fsPromises.unlink(fileName);
+  await fsPromises.unlink(fileName);
 
-    return res.status(200).json({
-        message: "Image deleted successfully!",
-    });
-
+  return res.status(200).json({
+    message: "Image deleted successfully!",
+  });
 });
 //..........................................................................
 //..........................................................................
